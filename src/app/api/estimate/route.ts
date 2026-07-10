@@ -5,6 +5,7 @@ import { calculateEstimate } from "@/lib/pricing";
 import { analyzeDamage, AnalysisUnavailableError, InadequatePhotosError } from "@/lib/ai/provider";
 import { takeRateLimit } from "@/lib/rate-limit";
 import { randomUUID } from "node:crypto";
+import { createUserInputAnalysis } from "@/lib/manual-analysis";
 
 export const runtime = "nodejs";
 const allowed = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -29,7 +30,14 @@ export async function POST(request: NextRequest) {
       const sanitized = await sharp(source).rotate().resize({ width: 1800, height: 1800, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 84 }).toBuffer();
       return { mime: "image/jpeg", base64: sanitized.toString("base64") };
     }));
-    const vision = await analyzeDamage(input, images);
+    let analysisMode: "ai" | "user_input_fallback" = "ai";
+    let vision;
+    try { vision = await analyzeDamage(input, images); }
+    catch (error) {
+      if (!(error instanceof AnalysisUnavailableError)) throw error;
+      vision = createUserInputAnalysis(input);
+      analysisMode = "user_input_fallback";
+    }
     const selectedAreas = input.damage.areas.filter(area => area !== "multiple" && area !== "other");
     const observedAreas = [...new Set(vision.observations.map(item => item.area).filter(area => area !== "multiple" && area !== "other"))];
     const selectedTypes = new Set(input.damage.types);
@@ -41,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
     const estimate = calculateEstimate(input, vision);
     if (!estimate.items.length || estimate.total.low < 0 || estimate.total.high <= estimate.total.low || !estimate.pricingVersion) throw new Error("Report validation failed.");
-    return NextResponse.json({ id: `CSP-${Date.now().toString(36).toUpperCase()}`, generatedAt: new Date().toISOString(), input, vision, estimate });
+    return NextResponse.json({ id: `${analysisMode === "ai" ? "CSP" : "CSP-M"}-${Date.now().toString(36).toUpperCase()}`, generatedAt: new Date().toISOString(), analysisMode, input, vision, estimate });
   } catch (error) {
     const errorId = `CSP-E-${randomUUID().slice(0, 8).toUpperCase()}`;
     console.error("Carspect estimate failure", { errorId, type: error instanceof Error ? error.name : "UnknownError", message: error instanceof Error ? error.message : "Unknown failure" });

@@ -10,12 +10,13 @@ export class InadequatePhotosError extends Error {
 const systemPrompt = `You classify only visible exterior vehicle damage for an informational repair estimate. Return JSON only. Never state hidden, structural, mechanical, suspension, electrical, restraint, or safety conditions as confirmed. Use conservative observations, flag uncertainty, and request better angles when needed. Dollar amounts are forbidden.`;
 
 export async function analyzeDamage(input: EstimateInput, images: Array<{ mime: string; base64: string }>): Promise<VisionAnalysis> {
-  const key = process.env.AI_API_KEY;
+  const key = process.env.AI_API_KEY ?? process.env.OPENAI_API_KEY;
   if (!key) throw new AnalysisUnavailableError("AI analysis is not configured.");
   if ((process.env.AI_PROVIDER ?? "openai") !== "openai") throw new AnalysisUnavailableError("Configured AI provider is not supported by this deployment.");
   const client = new OpenAI({ apiKey: key, timeout: 45_000, maxRetries: 1 });
-  const response = await client.responses.parse({
-    model: process.env.AI_VISION_MODEL ?? "gpt-5.4-mini",
+  let response;
+  try { response = await client.responses.parse({
+    model: process.env.AI_VISION_MODEL ?? "gpt-4o-mini",
     store: false,
     input: [{
       role: "user",
@@ -25,7 +26,7 @@ export async function analyzeDamage(input: EstimateInput, images: Array<{ mime: 
       ]
     }],
     text: { format: zodTextFormat(visionAnalysisSchema, "visible_vehicle_damage") }
-  });
+  }); } catch (error) { throw new AnalysisUnavailableError(error instanceof Error ? error.message : "The AI provider request failed."); }
   const result = visionAnalysisSchema.safeParse(response.output_parsed);
   if (!result.success) throw new AnalysisUnavailableError("The analysis response did not pass safety validation.");
   if (!result.data.vehiclePresent || !result.data.damageVisible || result.data.imageQuality === "insufficient") {

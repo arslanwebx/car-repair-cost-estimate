@@ -9,7 +9,7 @@ Carspect is a Next.js App Router application for generating an AI-assisted, item
 1. Install Node.js 20 or newer.
 2. Copy `.env.example` to `.env.local` and configure the server-only AI key and model.
 3. Run `npm install`, `npm test`, then `npm run dev`.
-4. Before launch, replace the legal owner fields, review pricing configuration with a qualified automotive estimator, configure `CONTACT_WEBHOOK_URL`, and connect durable distributed rate limiting for multi-instance hosting.
+4. Before launch, replace the legal owner fields, review pricing configuration with a qualified automotive estimator, configure `RESEND_API_KEY` with a verified `carspect.pro` sender, and connect durable distributed rate limiting for multi-instance hosting.
 
 ## Architecture
 
@@ -29,4 +29,4 @@ Photos are decoded and re-encoded by Sharp to remove EXIF metadata, sent to the 
 
 ## Deployment notes
 
-The estimator processes photos in memory and does not create private report links or persistent estimate records. This keeps the current deletion behavior immediate: clearing the browser workflow removes the local draft and there is no Carspect database copy. The NHTSA proxy fails open to manual vehicle entry. The contact form requires `CONTACT_WEBHOOK_URL`; when it is absent, users receive an explicit support-email fallback instead of a false success state. Replace the in-memory rate limiter with a shared store before multi-instance production deployment.
+The estimator processes photos in memory and does not create private report links or persistent estimate records. This keeps the current deletion behavior immediate: clearing the browser workflow removes the local draft and there is no Carspect database copy. The NHTSA proxy fails open to manual vehicle entry. Contact submissions are sent only to `support@carspect.pro` through Resend; when `RESEND_API_KEY` is absent, users receive an explicit support-email fallback instead of a false success state. Replace the in-memory rate limiter with a shared store before multi-instance production deployment.
