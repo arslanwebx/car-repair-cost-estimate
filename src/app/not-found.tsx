@@ -1,0 +1,1 @@
+import Link from "next/link"; export default function NotFound(){return <section className="empty-page shell narrow"><span className="eyebrow">404 · Page not found</span><h1>That page is not in the inspection bay.</h1><p>The address may have changed, or the page may no longer exist.</p><Link className="button" href="/">Return to Carspect</Link></section>}

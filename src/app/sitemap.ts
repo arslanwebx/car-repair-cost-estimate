@@ -1,0 +1,1 @@
+import type { MetadataRoute } from "next"; export default function sitemap():MetadataRoute.Sitemap{const base="https://carspect.pro";return ["","/about","/contact","/privacy","/terms","/disclaimer","/cookies","/photo-data-policy"].map(path=>({url:base+path,lastModified:new Date("2026-07-11"),changeFrequency:path===""?"weekly":"monthly",priority:path===""?1:.6}))}
