@@ -2,8 +2,8 @@
 
 Carspect is a Next.js App Router application for generating an AI-assisted, itemized U.S. car body repair cost range from vehicle details and damage photos.
 
-**[GET YOUR CAR DAMAGE ESTIMATE NOW!](https://carspect.pro/)
-**
+[GET YOUR CAR DAMAGE ESTIMATE NOW!](https://carspect.pro/)
+
 ## Setup
 
 1. Install Node.js 20 or newer.
