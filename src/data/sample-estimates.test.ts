@@ -1,0 +1,3 @@
+import { describe,expect,it } from "vitest";
+import { sampleEstimates,sumSampleBreakdown } from "./sample-estimates";
+describe("sample estimates",()=>{it("contains four unique, internally calculated reports",()=>{expect(sampleEstimates).toHaveLength(4);expect(new Set(sampleEstimates.map(sample=>sample.slug)).size).toBe(4);for(const sample of sampleEstimates)expect(sumSampleBreakdown(sample)).toEqual(sample.total)});it("links every report to a project image and positive range",()=>{for(const sample of sampleEstimates){expect(sample.image).toMatch(/^\/images\//);expect(sample.total.low).toBeGreaterThan(0);expect(sample.total.high).toBeGreaterThan(sample.total.low)}})});

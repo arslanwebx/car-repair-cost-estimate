@@ -13,14 +13,14 @@ export async function analyzeDamage(input: EstimateInput, images: Array<{ mime: 
   const key = process.env.AI_API_KEY;
   if (!key) throw new AnalysisUnavailableError("AI analysis is not configured.");
   if ((process.env.AI_PROVIDER ?? "openai") !== "openai") throw new AnalysisUnavailableError("Configured AI provider is not supported by this deployment.");
-  const client = new OpenAI({ apiKey: key });
+  const client = new OpenAI({ apiKey: key, timeout: 45_000, maxRetries: 1 });
   const response = await client.responses.parse({
     model: process.env.AI_VISION_MODEL ?? "gpt-5.4-mini",
     store: false,
     input: [{
       role: "user",
       content: [
-        { type: "input_text", text: `${systemPrompt}\nUser-reported details:\n${JSON.stringify(input)}\nReturn fields matching this shape: vehiclePresent, damageVisible, imageQuality, observations[{area,damageTypes,severity,operation,paintDamage,alignmentConcern,confidence}], possibleAdasInvolvement, hiddenDamageRisk, inPersonInspectionStronglyRecommended, confidence, lowConfidenceReasons, requiredAdditionalAngles.` },
+        { type: "input_text", text: `${systemPrompt}\nAnalyze every supplied image as one combined photo set. Deduplicate the same damage seen from multiple angles. Compare visible findings with the user selections, but report what is actually visible and express uncertainty. First decide whether each image is usable, whether a vehicle is present, and whether damage is visible.\nUser-reported details:\n${JSON.stringify(input)}\nReturn fields matching this shape: vehiclePresent, damageVisible, imageQuality, observations[{area,damageTypes,severity,operation,paintDamage,alignmentConcern,confidence}], possibleAdasInvolvement, hiddenDamageRisk, inPersonInspectionStronglyRecommended, confidence, lowConfidenceReasons, requiredAdditionalAngles.` },
         ...images.map((image) => ({ type: "input_image" as const, image_url: `data:${image.mime};base64,${image.base64}`, detail: "high" as const }))
       ]
     }],

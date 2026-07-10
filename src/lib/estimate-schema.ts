@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-export const damageAreas = ["front_bumper", "rear_bumper", "hood", "roof", "trunk", "left_front_fender", "right_front_fender", "left_front_door", "right_front_door", "left_rear_door", "right_rear_door", "left_quarter_panel", "right_quarter_panel", "rocker_panel", "grille", "headlight", "taillight", "side_mirror", "windshield", "side_glass", "wheel", "undercarriage", "multiple", "other"] as const;
-export const damageTypes = ["scratch", "paint_transfer", "paint_chip", "scuff", "small_dent", "deep_dent", "crease", "crack", "puncture", "torn_bumper", "misaligned_panel", "broken_light", "broken_mirror", "hail", "glass", "collision", "unknown"] as const;
+export const damageAreas = ["front_bumper", "rear_bumper", "hood", "roof", "trunk", "liftgate", "tailgate", "left_front_fender", "right_front_fender", "left_front_door", "right_front_door", "left_rear_door", "right_rear_door", "left_quarter_panel", "right_quarter_panel", "rocker_panel", "grille", "headlight", "taillight", "side_mirror", "windshield", "side_glass", "wheel", "undercarriage", "multiple", "other"] as const;
+export const damageTypes = ["scratch", "deep_scratch", "paint_transfer", "paint_chip", "scuff", "small_dent", "dent_without_paint_damage", "dent_with_paint_damage", "deep_dent", "crease", "crack", "puncture", "torn_bumper", "misaligned_panel", "broken_light", "broken_mirror", "hail", "glass", "collision", "unknown"] as const;
 
 export const estimateInputSchema = z.object({
   vehicle: z.object({
@@ -11,7 +11,12 @@ export const estimateInputSchema = z.object({
     bodyStyle: z.enum(["sedan", "coupe", "hatchback", "suv", "crossover", "pickup", "van", "minivan", "sports", "luxury", "other"]),
     mileage: z.enum(["under_25k", "25k_50k", "50k_100k", "100k_150k", "over_150k"]),
     trim: z.string().trim().max(80).optional(),
-    fuelType: z.enum(["gas", "diesel", "hybrid", "electric", "other"]).optional()
+    vin: z.string().trim().max(17).optional(),
+    fuelType: z.enum(["gas", "diesel", "hybrid", "electric", "other"]).optional(),
+    drivetrain: z.string().trim().max(40).optional(),
+    color: z.string().trim().max(40).optional(),
+    previousDamage: z.boolean().optional(),
+    aluminumBody: z.boolean().optional()
   }),
   damage: z.object({
     areas: z.array(z.enum(damageAreas)).min(1).max(12),
@@ -19,7 +24,11 @@ export const estimateInputSchema = z.object({
     description: z.string().trim().min(10).max(1500),
     safeToDrive: z.enum(["yes", "no", "unsure"]),
     fluidsLeaking: z.boolean(),
-    airbagsDeployed: z.boolean()
+    airbagsDeployed: z.boolean(),
+    warningLights: z.boolean().optional(),
+    wheelConcern: z.boolean().optional(),
+    sensorConcern: z.boolean().optional(),
+    panelsOpenNormally: z.boolean().optional()
   }),
   preferences: z.object({
     zipCode: z.string().regex(/^\d{5}$/),

@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
         { key: "X-Frame-Options", value: "DENY" }
       ]
     }];
+  },
+  async redirects() {
+    return [
+      { source: "/about", destination: "/about-us", permanent: true },
+      { source: "/contact", destination: "/contact-us", permanent: true },
+      { source: "/privacy", destination: "/privacy-policy", permanent: true },
+      { source: "/terms", destination: "/terms-of-service", permanent: true },
+      { source: "/cookies", destination: "/cookie-policy", permanent: true }
+    ];
   }
 };
 
