@@ -8,7 +8,8 @@ const compat = new FlatCompat({ baseDirectory: dirname });
 const config = [
   { ignores: [".next/**", "node_modules/**", "coverage/**", "next-env.d.ts"] },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
-  { files: ["src/lib/*-pdf.tsx"], rules: { "jsx-a11y/alt-text": "off" } }
+  { files: ["src/lib/*-pdf.tsx"], rules: { "jsx-a11y/alt-text": "off" } },
+  { files: ["server.js"], rules: { "@typescript-eslint/no-require-imports": "off" } }
 ];
 
 export default config;
