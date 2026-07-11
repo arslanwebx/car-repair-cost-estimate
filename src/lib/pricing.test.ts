@@ -11,6 +11,8 @@ describe("calculateEstimate", () => {
     expect(result.total.high).toBeGreaterThan(result.total.low);
     expect(result.items[0].area).toBe("rear_bumper");
     expect(result.pricingVersion).toMatch(/^US-/);
+    expect(result.market).toContain("Texas");
+    expect((result.total.high-result.total.low)/result.mid).toBeLessThanOrEqual(.25);
   });
   it("adds calibration when ADAS may be involved", () => {
     const normal = calculateEstimate(input, vision);

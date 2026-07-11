@@ -15,7 +15,8 @@ Carspect is a Next.js App Router application for generating an AI-assisted, item
 
 - `src/lib/ai/provider.ts`: vision-provider boundary and strict response validation.
 - `src/lib/pricing.ts`: deterministic pricing calculation.
-- `src/config/pricing.v1.ts`: versioned market configuration.
+- `src/config/workbook-pricing.v1.json`: workbook-derived U.S. and global market configuration.
+- `scripts/generate_workbook_pricing.py`: reproducible workbook-to-JSON importer.
 - `src/app/api/estimate/route.ts`: input/file validation, image sanitization, rate limiting, analysis, and pricing.
 - `src/components/estimator.tsx`: accessible seven-stage client workflow with append-only photo selection, duplicate detection, recovery, and report actions.
 - `src/data/sample-estimates.ts`: four validated demonstration estimates shared by cards, reports, and PDFs.

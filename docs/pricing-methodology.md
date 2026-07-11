@@ -1,7 +1,24 @@
-# Pricing methodology
+# Carspect pricing methodology
 
-Carspect keeps vision classification and pricing separate. The vision provider returns schema-validated observations and no dollar amounts. `src/config/pricing.v1.ts` contains the published configuration version, baseline labor ranges, regional and vehicle-class factors, parts-source factors, operation templates, scan/calibration ranges, supplies, and hidden-damage allowances.
+Carspect keeps photo classification and pricing separate. The vision provider returns schema-validated observations without dollar amounts. The deterministic engine in `src/lib/pricing.ts` calculates all costs from the versioned workbook data in `src/config/workbook-pricing.v1.json`.
 
-For each visible area, the engine selects a repair or replacement template. Low and high values use their respective labor hours, labor rates, parts ranges, and paint/material ranges. Vehicle, electric-vehicle, severity, and broad regional factors apply where relevant. Scan/calibration, supplies, potential hidden-damage allowance, and an explicit tax range are then added. The result is an estimated U.S. market repair range, not licensed shop-database pricing or a binding quote.
+## Workbook coverage
 
-Before production use, a qualified estimator should review every configuration value, ZIP-to-market mapping should be replaced with a maintained postal dataset, and state/local tax rules should be configured from a maintained source.
+The imported model contains 51 U.S. state/DC rate rows, 73 damage operations, vehicle-class, powertrain, body-material, paint, parts-source, and vehicle-age adjustments, plus 54 global-market rows. `scripts/generate_workbook_pricing.py` regenerates the JSON configuration from the source workbook. The configuration records every worksheet in `worksheetAudit` so an incomplete import fails review.
+
+## Calculation order
+
+1. Infer the U.S. state from the five-digit ZIP code and load its body, paint, frame, mechanical, material, scan, calibration, supplies, hazmat, parts, and hidden-reserve values.
+2. Map each validated damage observation to the closest workbook operation code.
+3. Apply vehicle-class, powertrain, body-material, paint-type, parts-source, and vehicle-age multipliers.
+4. Calculate body, paint, frame, and mechanical labor; paint materials; parts; and consumables.
+5. De-duplicate scans and calibration across multiple observations.
+6. Add capped shop supplies and one environmental fee.
+7. Calculate a central estimate, then apply a photo-confidence band: approximately ±12% for high confidence, ±16–18% for moderate confidence, and ±20–25% for limited/user-input fallback confidence, bounded by the workbook operation factors.
+8. Show the workbook hidden-damage reserve separately as a potential supplement. It does not silently inflate the main likely range.
+
+Taxes remain zero unless a maintained jurisdiction-specific rule can determine which repair components are taxable. Inventing a broad tax percentage would make the estimate less accurate.
+
+## Accuracy limitation
+
+The workbook and application both describe the output as a preliminary visible-damage range. No photo-only model can guarantee the final repair cost because teardown, diagnostic results, OEM procedures, exact part numbers, current availability, shop rates, and hidden damage can change the invoice. Production accuracy should be measured against actual shop estimates and final invoices, then used to recalibrate versioned rules.
