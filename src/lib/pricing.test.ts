@@ -19,4 +19,9 @@ describe("calculateEstimate", () => {
     const adas = calculateEstimate(input, { ...vision, possibleAdasInvolvement: true });
     expect(adas.scanCalibration.low).toBeGreaterThan(normal.scanCalibration.low);
   });
+  it("uses each observation confidence instead of one broad catalog band", () => {
+    const confident = calculateEstimate(input, vision);
+    const limited = calculateEstimate(input, { ...vision, observations: [{ ...vision.observations[0], confidence: .4 }] });
+    expect(limited.total.high-limited.total.low).toBeGreaterThan(confident.total.high-confident.total.low);
+  });
 });

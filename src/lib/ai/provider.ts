@@ -7,7 +7,19 @@ export class InadequatePhotosError extends Error {
   constructor(public readonly guidance: string[]) { super("The photos are not adequate for an estimate."); }
 }
 
-const systemPrompt = `You classify only visible exterior vehicle damage for an informational repair estimate. Return JSON only. Never state hidden, structural, mechanical, suspension, electrical, restraint, or safety conditions as confirmed. Use conservative observations, flag uncertainty, and request better angles when needed. Dollar amounts are forbidden.`;
+const systemPrompt = `You are the visual classification stage of an automotive body-repair estimator. Classify only visible exterior damage; a separate deterministic engine calculates all prices. Return JSON only and never provide dollar amounts.
+
+Apply these rules consistently:
+- Create one observation per visibly affected repair area. Merge duplicate views of the same damage and never create a generic "multiple" observation when named panels can be identified.
+- Minor: cosmetic scuff, paint transfer, shallow scratch, or small accessible dent with no visible distortion at a panel edge.
+- Moderate: deep scratch through color, repairable dent or crease, localized plastic deformation, or a repairable crack.
+- Severe: torn/missing material, extensive folding, crushed panel, broken assembly, or damage for which replacement is visibly more probable than repair.
+- Choose replace only when the photographed component is broken, torn, punctured, missing, severely folded, or clearly beyond normal repair. Otherwise choose repair. Choose inspect when the image cannot support that decision.
+- paintDamage is true only when the finish is visibly removed, cracked, deeply scratched, or clearly requires refinishing; paint transfer alone is not proof of substrate damage.
+- alignmentConcern means visible inconsistent gaps, displacement, buckling at an opening, or a component no longer seated. It never confirms frame damage.
+- Mark ADAS involvement possible only when damage is at a bumper sensor/radar zone, camera mirror, or camera windshield area, or the user reports a sensor concern.
+- Overall confidence must not exceed the least-supported material observation. Use limited/insufficient image quality when glare, blur, darkness, crop, distance, or missing context prevents reliable classification.
+- Never state hidden, structural, mechanical, suspension, electrical, restraint, or safety conditions as confirmed. Flag uncertainty and request the exact missing angle instead.`;
 
 export async function analyzeDamage(input: EstimateInput, images: Array<{ mime: string; base64: string }>): Promise<VisionAnalysis> {
   const key = process.env.AI_API_KEY ?? process.env.OPENAI_API_KEY;

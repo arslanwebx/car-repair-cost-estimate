@@ -22,7 +22,7 @@ Carspect is a Next.js App Router application for generating an AI-assisted, item
 - `src/data/sample-estimates.ts`: four validated demonstration estimates shared by cards, reports, and PDFs.
 - `src/lib/report-pdf.tsx`: server-only live report PDF generator.
 
-Photos are decoded and re-encoded by Sharp to remove EXIF metadata, sent to the configured AI provider, and not persisted by the current implementation. AI absence and inadequate images produce explicit errors rather than a fabricated result.
+Photos are decoded and re-encoded by Sharp to remove EXIF metadata, sent to the configured AI provider, and not persisted by the current implementation. Inadequate photos produce an explicit request for better images. If the AI provider is unavailable, the site can still produce a clearly labeled, limited-confidence range from the user-selected damage; all dollar amounts continue to come from the deterministic workbook pricing engine.
 
 ## Routes
 

@@ -54,24 +54,26 @@ function selectOperation(area:string,types:readonly string[],severity:string,str
   return surfaceOnly?(types.includes("deep_scratch")?"SCRATCH_DEEP_PANEL":"SCRATCH_CLEAR_MINOR"):"DOOR_REPAIR";
 }
 function valueRange(value:number,lowFactor:number,highFactor:number):MoneyRange{return {low:roundMoney(value*lowFactor),high:roundMoney(value*highFactor)}}
+function confidenceBand(confidence:number){return confidence>=.8?{low:.88,high:1.12}:confidence>=.55?{low:.84,high:1.18}:{low:.8,high:1.25}}
 
 export function calculateEstimate(input:EstimateInput,vision:VisionAnalysis):PricedEstimate{
   const rates=marketRate(input.preferences.zipCode),vehicle=adjustment(config.vehicleAdjustments.classes,className(input.vehicle.bodyStyle)),powertrain=adjustment(config.vehicleAdjustments.powertrains,powertrainName(input.vehicle.fuelType)),material=adjustment(config.vehicleAdjustments.materials,input.vehicle.aluminumBody?"Aluminum":"Steel"),paint=adjustment(config.vehicleAdjustments.paintTypes,"Metallic"),source=partsSource(input.preferences.parts),age=ageAdjustment(input.vehicle.year);
   const seen=new Set<string>();
   const selected=vision.observations.map(observation=>({observation,code:selectOperation(observation.area,observation.damageTypes,observation.severity,observation.operation,vision.possibleAdasInvolvement,input.vehicle.fuelType??"gas")})).filter(item=>{const key=`${item.observation.area}:${item.code}`;if(seen.has(key))return false;seen.add(key);return true}).map(item=>({observation:item.observation,operation:operationByCode.get(item.code)??operationByCode.get("DOOR_REPAIR")!}));
-  const catalogLow=Math.min(...selected.map(item=>item.operation.lowFactor),.85),catalogHigh=Math.max(...selected.map(item=>item.operation.highFactor),1.2);
-  const confidence=vision.confidence,cap=confidence>=.8?{low:.88,high:1.12}:confidence>=.55?{low:.84,high:1.18}:{low:.8,high:1.25};
-  const lowFactor=Math.max(catalogLow,cap.low),highFactor=Math.min(catalogHigh,cap.high);
-  let midItems=0,totalLabor=0;
+  const observationConfidence=selected.length?selected.reduce((sum,item)=>sum+item.observation.confidence,0)/selected.length:vision.confidence;
+  const feeBand=confidenceBand(Math.min(vision.confidence,observationConfidence));
+  let midItems=0,itemLow=0,itemHigh=0,totalLabor=0;
   const items=selected.map(({observation,operation})=>{
+    const band=confidenceBand(Math.min(vision.confidence,observation.confidence));
+    const lowFactor=Math.max(operation.lowFactor,band.low),highFactor=Math.min(operation.highFactor,band.high);
     const body=operation.bodyHours*rates.bodyRate*numeric(vehicle.labor)*numeric(material.bodyLabor)*numeric(age.labor),paintLabor=operation.refinishHours*rates.paintRate*numeric(vehicle.labor)*numeric(paint.paintLabor)*numeric(age.labor),frame=operation.frameHours*rates.frameRate*numeric(vehicle.labor)*numeric(material.bodyLabor)*numeric(age.labor),mechanical=operation.mechanicalHours*rates.mechanicalRate*numeric(powertrain.mechanicalLabor)*numeric(age.labor),materials=operation.refinishHours*rates.paintMaterialRate*numeric(paint.materials),parts=operation.basePart*rates.partsMultiplier*numeric(vehicle.parts)*numeric(powertrain.parts)*numeric(material.parts)*numeric(source.price)*numeric(age.parts),consumables=operation.consumables*rates.partsMultiplier;
-    const mid=body+paintLabor+frame+mechanical+materials+parts+consumables;midItems+=mid;totalLabor+=body+paintLabor+frame+mechanical;
+    const mid=body+paintLabor+frame+mechanical+materials+parts+consumables;midItems+=mid;itemLow+=mid*lowFactor;itemHigh+=mid*highFactor;totalLabor+=body+paintLabor+frame+mechanical;
     return {area:observation.area,operation:operation.strategy,operationCode:operation.code,laborHours:valueRange(operation.bodyHours+operation.refinishHours+operation.frameHours+operation.mechanicalHours,lowFactor,highFactor),parts:valueRange(parts,lowFactor,highFactor),bodyLabor:valueRange(body,lowFactor,highFactor),paint:valueRange(paintLabor+materials,lowFactor,highFactor),frameLabor:valueRange(frame,lowFactor,highFactor),mechanicalLabor:valueRange(mechanical,lowFactor,highFactor),consumables:valueRange(consumables,lowFactor,highFactor)};
   });
   const scanMid=selected.some(item=>item.operation.scanNeed==="PrePost")?rates.scanFee*numeric(powertrain.calibration):0;
   const calibrationMid=Math.max(0,...selected.map(({operation})=>operation.calibrationNeed==="Static"?rates.staticCalibration:operation.calibrationNeed==="Dynamic"?rates.dynamicCalibration:operation.calibrationNeed==="Both"?rates.staticCalibration+rates.dynamicCalibration:operation.calibrationNeed==="Conditional"&&vision.possibleAdasInvolvement?.55*((rates.staticCalibration+rates.dynamicCalibration)/2):0))*numeric(powertrain.calibration)*numeric(vehicle.calibration);
   const suppliesMid=Math.min(totalLabor*rates.shopSuppliesRate,450)+rates.hazmatFee;
   const mid=midItems+scanMid+calibrationMid+suppliesMid;
-  const scanCalibration=valueRange(scanMid+calibrationMid,lowFactor,highFactor),shopSupplies=valueRange(suppliesMid,lowFactor,highFactor),subtotal=valueRange(mid,lowFactor,highFactor),tax={low:0,high:0},total={low:roundMoney(mid*lowFactor),high:roundMoney(mid*highFactor)},hiddenDamage={low:0,high:roundMoney(mid*rates.hiddenReserve)};
+  const scanCalibration=valueRange(scanMid+calibrationMid,feeBand.low,feeBand.high),shopSupplies=valueRange(suppliesMid,feeBand.low,feeBand.high),subtotal={low:roundMoney(itemLow+scanCalibration.low+shopSupplies.low),high:roundMoney(itemHigh+scanCalibration.high+shopSupplies.high)},tax={low:0,high:0},total={...subtotal},hiddenDamage={low:0,high:roundMoney(mid*rates.hiddenReserve)};
   return {pricingVersion:config.version,market:`${rates.state} · ${rates.zone}`,mid:roundMoney(mid),items,scanCalibration,shopSupplies,hiddenDamage,subtotal,tax,total};
 }
