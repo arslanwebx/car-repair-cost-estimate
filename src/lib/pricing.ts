@@ -10,6 +10,22 @@ type Adjustment={name:string;[key:string]:string|number|null};
 type WorkbookConfig={version:string;usaRates:StateRate[];damageOperations:Operation[];vehicleAdjustments:{classes:Adjustment[];powertrains:Adjustment[];materials:Adjustment[];paintTypes:Adjustment[];partsSources:Adjustment[];vehicleAges:Adjustment[]}};
 const config=rawConfig as unknown as WorkbookConfig;
 const operationByCode=new Map(config.damageOperations.map(operation=>[operation.code,operation]));
+const pricingVersion="US-2026.07-v2";
+// Accounts for common retail R&I, preparation, corrosion protection, color matching,
+// blending, and procedure overhead omitted by the base workbook operation.
+const retailProcedureFactor:Record<string,number>={
+  SCRATCH_CLEAR_MINOR:1.2,SCRATCH_DEEP_PANEL:1.35,PDR_DENT_SMALL:1.2,PDR_DENT_MEDIUM:1.3,
+  BUMPER_FRONT_SCUFF:1.3,BUMPER_FRONT_DENT_REPAIR:1.65,BUMPER_FRONT_CRACK_REPAIR:1.55,BUMPER_FRONT_REPLACE_BASIC:1.12,BUMPER_FRONT_REPLACE_ADAS:1.16,
+  BUMPER_REAR_SCUFF:1.35,BUMPER_REAR_REPAIR:2,BUMPER_REAR_REPLACE_BASIC:1.15,BUMPER_REAR_REPLACE_BSM:1.18,
+  FENDER_PDR_SMALL:1.25,FENDER_REPAIR:4.1,FENDER_REPLACE:1.45,
+  DOOR_PDR_SMALL:1.25,DOOR_REPAIR:1.8,DOOR_SKIN_REPLACE:1.5,DOOR_SHELL_REPLACE:1.7,
+  HOOD_REPAIR:1.65,HOOD_REPLACE:1.35,TRUNK_LID_REPAIR:1.6,TRUNK_LID_REPLACE:1.3,TAILGATE_REPLACE:1.35,
+  QUARTER_PANEL_REPAIR:1.45,QUARTER_PANEL_REPLACE:1.25,ROCKER_REPAIR:1.35,ROCKER_REPLACE:1.25,ROOF_REPAIR:1.4,ROOF_REPLACE:1.2,
+  GRILLE_REPLACE:1.16,MIRROR_REPLACE_BASIC:1.15,MIRROR_REPLACE_CAMERA:1.2,HEADLAMP_LED:1.12,HEADLAMP_MATRIX:1.12,
+  WINDSHIELD_STANDARD:1.1,WINDSHIELD_ADAS:1.15,SIDE_GLASS_REPLACE:1.1,WHEEL_REFINISH:1.15,WHEEL_REPLACE:1.1,
+  FRAME_PULL_MINOR:1.25,FRAME_PULL_MODERATE:1.25,FRAME_RAIL_SECTION:1.2,CORE_SUPPORT_REPLACE:1.2,CRASH_BAR_REPLACE:1.15,
+  EV_BATTERY_INSPECTION:1.2,EV_BATTERY_SHIELD:1.25,EV_BATTERY_PACK:1.1,EV_CHARGE_PORT:1.2
+};
 const roundMoney=(value:number)=>Math.max(0,Math.round(value/10)*10);
 const numeric=(value:string|number|null|undefined,fallback=1)=>typeof value==="number"?value:fallback;
 
@@ -66,7 +82,8 @@ export function calculateEstimate(input:EstimateInput,vision:VisionAnalysis):Pri
   const items=selected.map(({observation,operation})=>{
     const band=confidenceBand(Math.min(vision.confidence,observation.confidence));
     const lowFactor=Math.max(operation.lowFactor,band.low),highFactor=Math.min(operation.highFactor,band.high);
-    const body=operation.bodyHours*rates.bodyRate*numeric(vehicle.labor)*numeric(material.bodyLabor)*numeric(age.labor),paintLabor=operation.refinishHours*rates.paintRate*numeric(vehicle.labor)*numeric(paint.paintLabor)*numeric(age.labor),frame=operation.frameHours*rates.frameRate*numeric(vehicle.labor)*numeric(material.bodyLabor)*numeric(age.labor),mechanical=operation.mechanicalHours*rates.mechanicalRate*numeric(powertrain.mechanicalLabor)*numeric(age.labor),materials=operation.refinishHours*rates.paintMaterialRate*numeric(paint.materials),parts=operation.basePart*rates.partsMultiplier*numeric(vehicle.parts)*numeric(powertrain.parts)*numeric(material.parts)*numeric(source.price)*numeric(age.parts),consumables=operation.consumables*rates.partsMultiplier;
+    const procedure=retailProcedureFactor[operation.code]??1.15;
+    const body=operation.bodyHours*rates.bodyRate*numeric(vehicle.labor)*numeric(material.bodyLabor)*numeric(age.labor)*procedure,paintLabor=operation.refinishHours*rates.paintRate*numeric(vehicle.labor)*numeric(paint.paintLabor)*numeric(age.labor)*procedure,frame=operation.frameHours*rates.frameRate*numeric(vehicle.labor)*numeric(material.bodyLabor)*numeric(age.labor)*procedure,mechanical=operation.mechanicalHours*rates.mechanicalRate*numeric(powertrain.mechanicalLabor)*numeric(age.labor)*procedure,materials=operation.refinishHours*rates.paintMaterialRate*numeric(paint.materials)*procedure,parts=operation.basePart*rates.partsMultiplier*numeric(vehicle.parts)*numeric(powertrain.parts)*numeric(material.parts)*numeric(source.price)*numeric(age.parts)*procedure,consumables=operation.consumables*rates.partsMultiplier*procedure;
     const mid=body+paintLabor+frame+mechanical+materials+parts+consumables;midItems+=mid;itemLow+=mid*lowFactor;itemHigh+=mid*highFactor;totalLabor+=body+paintLabor+frame+mechanical;
     return {area:observation.area,operation:operation.strategy,operationCode:operation.code,laborHours:valueRange(operation.bodyHours+operation.refinishHours+operation.frameHours+operation.mechanicalHours,lowFactor,highFactor),parts:valueRange(parts,lowFactor,highFactor),bodyLabor:valueRange(body,lowFactor,highFactor),paint:valueRange(paintLabor+materials,lowFactor,highFactor),frameLabor:valueRange(frame,lowFactor,highFactor),mechanicalLabor:valueRange(mechanical,lowFactor,highFactor),consumables:valueRange(consumables,lowFactor,highFactor)};
   });
@@ -74,6 +91,6 @@ export function calculateEstimate(input:EstimateInput,vision:VisionAnalysis):Pri
   const calibrationMid=Math.max(0,...selected.map(({operation})=>operation.calibrationNeed==="Static"?rates.staticCalibration:operation.calibrationNeed==="Dynamic"?rates.dynamicCalibration:operation.calibrationNeed==="Both"?rates.staticCalibration+rates.dynamicCalibration:operation.calibrationNeed==="Conditional"&&vision.possibleAdasInvolvement?.55*((rates.staticCalibration+rates.dynamicCalibration)/2):0))*numeric(powertrain.calibration)*numeric(vehicle.calibration);
   const suppliesMid=Math.min(totalLabor*rates.shopSuppliesRate,450)+rates.hazmatFee;
   const mid=midItems+scanMid+calibrationMid+suppliesMid;
-  const scanCalibration=valueRange(scanMid+calibrationMid,feeBand.low,feeBand.high),shopSupplies=valueRange(suppliesMid,feeBand.low,feeBand.high),subtotal={low:roundMoney(itemLow+scanCalibration.low+shopSupplies.low),high:roundMoney(itemHigh+scanCalibration.high+shopSupplies.high)},tax={low:0,high:0},total={...subtotal},hiddenDamage={low:0,high:roundMoney(mid*rates.hiddenReserve)};
-  return {pricingVersion:config.version,market:`${rates.state} · ${rates.zone}`,mid:roundMoney(mid),items,scanCalibration,shopSupplies,hiddenDamage,subtotal,tax,total};
+  const scanCalibration=valueRange(scanMid+calibrationMid,feeBand.low,feeBand.high),shopSupplies=valueRange(suppliesMid,feeBand.low,feeBand.high),subtotal={low:roundMoney(itemLow+scanCalibration.low+shopSupplies.low),high:roundMoney(itemHigh+scanCalibration.high+shopSupplies.high)},tax={low:0,high:0},hiddenDamage={low:0,high:roundMoney(mid*rates.hiddenReserve)},hiddenWeight=vision.hiddenDamageRisk==="high"?1:vision.hiddenDamageRisk==="moderate"?.7:0,total={low:subtotal.low,high:roundMoney(subtotal.high+hiddenDamage.high*hiddenWeight)};
+  return {pricingVersion,market:`${rates.state} · ${rates.zone}`,mid:roundMoney(mid),items,scanCalibration,shopSupplies,hiddenDamage,subtotal,tax,total};
 }
