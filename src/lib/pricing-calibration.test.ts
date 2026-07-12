@@ -49,6 +49,6 @@ describe("2026 retail calibration references", () => {
     expect(Math.abs(result.mid-reference.target.average)/reference.target.average).toBeLessThan(.1);
     expect(result.total.low).toBeLessThanOrEqual(reference.target.average);
     expect(result.total.high).toBeGreaterThanOrEqual(reference.target.average);
-    expect(result.pricingVersion).toBe("US-2026.07-v2");
+    expect(result.pricingVersion).toBe("US-2026.07-v3");
   });
 });

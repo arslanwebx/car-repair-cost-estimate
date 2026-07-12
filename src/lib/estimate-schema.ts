@@ -48,6 +48,8 @@ export const visionAnalysisSchema = z.object({
     operation: z.enum(["repair", "replace", "inspect"]),
     paintDamage: z.boolean(),
     alignmentConcern: z.boolean(),
+    damageExtent: z.enum(["localized", "panel_section", "most_of_panel"]).optional(),
+    openingOrIntrusionConcern: z.boolean().optional(),
     confidence: z.number().min(0).max(1)
   })).max(16),
   possibleAdasInvolvement: z.boolean(),

@@ -10,7 +10,7 @@ The imported model contains 51 U.S. state/DC rate rows, 73 damage operations, ve
 
 1. Infer the U.S. state from the five-digit ZIP code and load its body, paint, frame, mechanical, material, scan, calibration, supplies, hazmat, parts, and hidden-reserve values.
 2. Map each validated damage observation to the closest workbook operation code.
-3. Apply vehicle-class, powertrain, body-material, paint-type, parts-source, and vehicle-age multipliers.
+3. Calculate new OEM, certified aftermarket, recycled OEM, and economical parts scenarios independently. Each operation has source-eligibility rules; unsuitable alternatives fall back to OEM and are disclosed in the report.
 4. Calculate body, paint, frame, and mechanical labor; paint materials; parts; and consumables.
 5. De-duplicate scans and calibration across multiple observations.
 6. Add capped shop supplies and one environmental fee.
@@ -18,6 +18,8 @@ The imported model contains 51 U.S. state/DC rate rows, 73 damage operations, ve
 8. Show the workbook hidden-damage reserve separately as a potential supplement. It does not silently inflate the main likely range.
 
 Taxes remain zero unless a maintained jurisdiction-specific rule can determine which repair components are taxable. Inventing a broad tax percentage would make the estimate less accurate.
+
+The `all` selection returns the envelope of all four feasible scenarios and exposes each scenario separately. A specific selection returns only that category's run. Labor, paint, scans, and procedures do not receive an artificial parts discount.
 
 ## Accuracy limitation
 

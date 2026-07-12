@@ -21,7 +21,7 @@ export function SampleReport({ sample }: { sample: SampleEstimate }) {
     </div>
     <Image className="report-photo" src={sample.image} alt={sample.imageAlt} width={1536} height={1024} priority sizes="(max-width: 900px) 100vw, 55vw"/>
     <section className="report-summary">
-      <div><h2>Damage overview</h2><p>{sample.damage}</p><dl><div><dt>Severity</dt><dd>{sample.severity}</dd></div><div><dt>Likely operation</dt><dd>{sample.operation}</dd></div><div><dt>Labor hours</dt><dd>{sample.laborHours.low} to {sample.laborHours.high}</dd></div><div><dt>Pricing data</dt><dd>US-2026.07-v2</dd></div></dl></div>
+      <div><h2>Damage overview</h2><p>{sample.damage}</p><dl><div><dt>Severity</dt><dd>{sample.severity}</dd></div><div><dt>Likely operation</dt><dd>{sample.operation}</dd></div><div><dt>Labor hours</dt><dd>{sample.laborHours.low} to {sample.laborHours.high}</dd></div><div><dt>Pricing data</dt><dd>US-2026.07-v3</dd></div></dl></div>
       <div className="confidence-panel"><strong>{sample.confidence} confidence</strong><p>{sample.confidenceExplanation}</p><p>Confidence describes photo clarity, not pricing certainty or vehicle safety.</p></div>
     </section>
     <section><h2>Visible-damage findings</h2><ul className="report-list">{sample.findings.map(item=><li key={item}>{item}</li>)}</ul></section>

@@ -24,4 +24,32 @@ describe("calculateEstimate", () => {
     const limited = calculateEstimate(input, { ...vision, observations: [{ ...vision.observations[0], confidence: .4 }] });
     expect(limited.total.high-limited.total.low).toBeGreaterThan(confident.total.high-confident.total.low);
   });
+  it("prices every requested parts category as a distinct feasible scenario", () => {
+    const replacementInput:EstimateInput={...input,damage:{...input.damage,areas:["left_front_door"],types:["deep_dent","collision"]}};
+    const replacementVision:VisionAnalysis={...vision,hiddenDamageRisk:"high",observations:[{area:"left_front_door",damageTypes:["deep_dent","collision"],severity:"severe",operation:"replace",paintDamage:true,alignmentConcern:true,damageExtent:"most_of_panel",openingOrIntrusionConcern:true,confidence:.9}]};
+    const oem=calculateEstimate({...replacementInput,preferences:{...replacementInput.preferences,parts:"new_oem"}},replacementVision);
+    const used=calculateEstimate({...replacementInput,preferences:{...replacementInput.preferences,parts:"recycled_oem"}},replacementVision);
+    const aftermarket=calculateEstimate({...replacementInput,preferences:{...replacementInput.preferences,parts:"aftermarket"}},replacementVision);
+    const all=calculateEstimate({...replacementInput,preferences:{...replacementInput.preferences,parts:"all"}},replacementVision);
+    expect(used.items[0].parts.low).toBeLessThan(oem.items[0].parts.low);
+    expect(used.total.low).toBeLessThan(oem.total.low);
+    expect(aftermarket.partsScenarios[0].oemFallbackItems).toBe(1);
+    expect(aftermarket.items[0].parts).toEqual(oem.items[0].parts);
+    expect(all.partsScenarios.map(item=>item.category)).toEqual(["economical","aftermarket","recycled_oem","new_oem"]);
+    expect(all.total.low).toBe(used.total.low);
+    expect(all.total.high).toBe(oem.total.high);
+  });
+  it("does not underprice the supplied severe two-door side-impact pattern", () => {
+    const fitInput:EstimateInput={vehicle:{year:2019,make:"Honda",model:"Fit",bodyStyle:"hatchback",mileage:"50k_100k",fuelType:"gas"},damage:{areas:["right_front_door","right_rear_door","side_mirror","rocker_panel"],types:["deep_dent","dent_with_paint_damage","collision","broken_mirror"],description:"Both passenger doors are crushed and will be replaced; mirror and rocker are damaged.",safeToDrive:"no",fluidsLeaking:false,airbagsDeployed:false,panelsOpenNormally:false},preferences:{zipCode:"33130",parts:"all"}};
+    const fitVision:VisionAnalysis={vehiclePresent:true,damageVisible:true,imageQuality:"sufficient",observations:[
+      {area:"right_front_door",damageTypes:["deep_dent","collision"],severity:"severe",operation:"replace",paintDamage:true,alignmentConcern:true,damageExtent:"most_of_panel",openingOrIntrusionConcern:true,confidence:.9},
+      {area:"right_rear_door",damageTypes:["deep_dent","collision"],severity:"severe",operation:"replace",paintDamage:true,alignmentConcern:true,damageExtent:"most_of_panel",openingOrIntrusionConcern:true,confidence:.9},
+      {area:"side_mirror",damageTypes:["broken_mirror"],severity:"severe",operation:"replace",paintDamage:false,alignmentConcern:false,damageExtent:"panel_section",openingOrIntrusionConcern:false,confidence:.9},
+      {area:"rocker_panel",damageTypes:["deep_dent","collision"],severity:"moderate",operation:"repair",paintDamage:true,alignmentConcern:true,damageExtent:"panel_section",openingOrIntrusionConcern:false,confidence:.75}
+    ],possibleAdasInvolvement:false,hiddenDamageRisk:"high",inPersonInspectionStronglyRecommended:true,confidence:.75,lowConfidenceReasons:[],requiredAdditionalAngles:[]};
+    const result=calculateEstimate(fitInput,fitVision);
+    expect(result.items.filter(item=>item.operationCode==="DOOR_SHELL_REPLACE")).toHaveLength(2);
+    expect(result.total.low).toBeGreaterThanOrEqual(7000);
+    expect(result.total.high).toBeGreaterThan(10000);
+  });
 });
