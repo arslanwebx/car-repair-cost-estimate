@@ -3,13 +3,15 @@
 Use Hostinger’s **Node.js Web App** deployment, not a static website deployment.
 
 - Framework preset: `Next.js`
-- Node.js version: `22.x` or `24.x`
+- Node.js version: `24.x` (recommended LTS line for this deployment; `22.x` remains supported)
 - Install command: `npm ci`
 - Build command: `npm run build`
-- Start command: `npm run start`
+- Start command: `node server.js` (starts one Node.js process directly)
 - Entry file when Hostinger asks for one: `server.js`
 - Output directory when Hostinger asks for one: `.next`
 - Health URL: `/api/health`
+
+Use Hostinger's built-in Node.js process manager with one application instance. Do not add PM2, cluster mode, a second startup command, or a cron entry that launches the web server. The application already handles `SIGTERM`/`SIGINT` and performs a bounded graceful shutdown.
 
 Required production environment variables:
 

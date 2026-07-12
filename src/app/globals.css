@@ -67,6 +67,7 @@ body{overflow-x:hidden}.menu-button{display:none;width:44px;height:44px;border:1
   .vehicle-structure{min-height:290px}
 }
 @media(max-width:600px){
+  .landing-hero~.section{content-visibility:auto;contain-intrinsic-size:auto 700px}
   .section{padding:68px 0}
   .home-section-heading{margin-bottom:26px}
   .process-grid{grid-template-columns:1fr}

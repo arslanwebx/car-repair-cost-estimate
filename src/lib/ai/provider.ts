@@ -21,11 +21,20 @@ Apply these rules consistently:
 - Overall confidence must not exceed the least-supported material observation. Use limited/insufficient image quality when glare, blur, darkness, crop, distance, or missing context prevents reliable classification.
 - Never state hidden, structural, mechanical, suspension, electrical, restraint, or safety conditions as confirmed. Flag uncertainty and request the exact missing angle instead.`;
 
-export async function analyzeDamage(input: EstimateInput, images: Array<{ mime: string; base64: string }>): Promise<VisionAnalysis> {
+let sharedClient: { apiKey: string; client: OpenAI } | undefined;
+
+function getClient(apiKey: string) {
+  if (!sharedClient || sharedClient.apiKey !== apiKey) {
+    sharedClient = { apiKey, client: new OpenAI({ apiKey, timeout: 45_000, maxRetries: 1 }) };
+  }
+  return sharedClient.client;
+}
+
+export async function analyzeDamage(input: EstimateInput, images: Array<{ mime: string; base64: string }>, signal?: AbortSignal): Promise<VisionAnalysis> {
   const key = process.env.AI_API_KEY ?? process.env.OPENAI_API_KEY;
   if (!key) throw new AnalysisUnavailableError("AI analysis is not configured.");
   if ((process.env.AI_PROVIDER ?? "openai") !== "openai") throw new AnalysisUnavailableError("Configured AI provider is not supported by this deployment.");
-  const client = new OpenAI({ apiKey: key, timeout: 45_000, maxRetries: 1 });
+  const client = getClient(key);
   let response;
   try { response = await client.responses.parse({
     model: process.env.AI_VISION_MODEL ?? "gpt-4o-mini",
@@ -38,7 +47,10 @@ export async function analyzeDamage(input: EstimateInput, images: Array<{ mime: 
       ]
     }],
     text: { format: zodTextFormat(visionAnalysisSchema, "visible_vehicle_damage") }
-  }); } catch (error) { throw new AnalysisUnavailableError(error instanceof Error ? error.message : "The AI provider request failed."); }
+  }, { signal }); } catch (error) {
+    if (signal?.aborted) throw signal.reason instanceof Error ? signal.reason : new DOMException("The request was cancelled.", "AbortError");
+    throw new AnalysisUnavailableError(error instanceof Error ? error.message : "The AI provider request failed.");
+  }
   const result = visionAnalysisSchema.safeParse(response.output_parsed);
   if (!result.success) throw new AnalysisUnavailableError("The analysis response did not pass safety validation.");
   if (!result.data.vehiclePresent || !result.data.damageVisible || result.data.imageQuality === "insufficient") {

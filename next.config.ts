@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  experimental: { serverActions: { bodySizeLimit: "80mb" } },
+  images: { minimumCacheTTL: 86_400, formats: ["image/webp"] },
   async headers() {
     return [{
       source: "/(.*)",
