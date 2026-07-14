@@ -31,3 +31,14 @@ Photos are decoded and re-encoded by Sharp to remove EXIF metadata, sent to the 
 ## Deployment notes
 
 The estimator processes photos in memory and does not create private report links or persistent estimate records. This keeps the current deletion behavior immediate: clearing the browser workflow removes the local draft and there is no Carspect database copy. The NHTSA proxy fails open to manual vehicle entry. Contact submissions are sent only to `support@carspect.pro` through Resend; when `RESEND_API_KEY` is absent, users receive an explicit support-email fallback instead of a false success state. Replace the in-memory rate limiter with a shared store before multi-instance production deployment.
+
+### Cloudflare Workers
+
+This full-stack Next.js application deploys through Cloudflare Workers with the OpenNext adapter; it is not a static Pages export. In Workers Builds, use:
+
+- Build command: `npm run build:cloudflare`
+- Deploy command: `npx wrangler deploy`
+
+Add `AI_API_KEY` (or `OPENAI_API_KEY`), `AI_VISION_MODEL`, `RESEND_API_KEY`, and any public `NEXT_PUBLIC_*` values under **Build Variables and secrets**. Add runtime secrets to the Worker as well. The committed `wrangler.jsonc` deliberately gives the Worker and its self-service binding the same `car-repair-cost-estimate` name.
+
+For a local production-runtime check, run `npm run preview:cloudflare`. To build and deploy from a signed-in local shell, run `npm run deploy:cloudflare`.
