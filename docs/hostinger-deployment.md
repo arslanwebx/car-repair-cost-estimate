@@ -5,7 +5,7 @@ Use Hostinger’s **Node.js Web App** deployment, not a static website deploymen
 - Framework preset: `Next.js`
 - Node.js version: `24.x` (recommended LTS line for this deployment; `22.x` remains supported)
 - Install command: `npm ci`
-- Build command: `npm run build`
+- Build command: `npm run build:next`
 - Start command: `node server.js` (starts one Node.js process directly)
 - Entry file when Hostinger asks for one: `server.js`
 - Output directory when Hostinger asks for one: `.next`

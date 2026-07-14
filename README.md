@@ -20,9 +20,9 @@ Carspect is a Next.js App Router application for generating an AI-assisted, item
 - `src/app/api/estimate/route.ts`: input/file validation, image sanitization, rate limiting, analysis, and pricing.
 - `src/components/estimator.tsx`: accessible seven-stage client workflow with append-only photo selection, duplicate detection, recovery, and report actions.
 - `src/data/sample-estimates.ts`: four validated demonstration estimates shared by cards, reports, and PDFs.
-- `src/lib/report-pdf.tsx`: server-only live report PDF generator.
+- `src/lib/report-pdf.ts`: server-only live report PDF generator.
 
-Photos are decoded and re-encoded by Sharp to remove EXIF metadata, sent to the configured AI provider, and not persisted by the current implementation. Inadequate photos produce an explicit request for better images. If the AI provider is unavailable, the site can still produce a clearly labeled, limited-confidence range from the user-selected damage; all dollar amounts continue to come from the deterministic workbook pricing engine.
+Photos are decoded and re-encoded to remove EXIF metadata, sent to the configured AI provider, and not persisted by the current implementation. Cloudflare uses its Images binding for this step, while the Node deployment uses Sharp. Inadequate photos produce an explicit request for better images. If the AI provider is unavailable, the site can still produce a clearly labeled, limited-confidence range from the user-selected damage; all dollar amounts continue to come from the deterministic workbook pricing engine.
 
 ## Routes
 
@@ -34,10 +34,10 @@ The estimator processes photos in memory and does not create private report link
 
 ### Cloudflare Workers
 
-This full-stack Next.js application deploys through Cloudflare Workers with the OpenNext adapter; it is not a static Pages export. In Workers Builds, use:
+This full-stack Next.js application deploys through Cloudflare Workers with the OpenNext adapter; it is not a static Pages export. The default build now generates both the Next.js output and the `.open-next` Worker bundle, so both the recommended commands and Cloudflare's auto-detected Wrangler deploy path work. In Workers Builds, use:
 
-- Build command: `npm run cf:build`
-- Deploy command: `npx opennextjs-cloudflare deploy`
+- Build command: `npm run build`
+- Deploy command: `npx wrangler deploy`
 - Root directory: `/`
 - Node.js version: `22`
 
@@ -45,4 +45,4 @@ Add `AI_PROVIDER`, `AI_API_KEY` (or `OPENAI_API_KEY`), `AI_VISION_MODEL`, `RESEN
 
 The estimate and PDF routes use the Cloudflare Images binding to validate, re-encode, resize, and strip metadata from uploaded photos. Cloudflare Images transformations may be billed by Cloudflare. The existing Node/Hostinger runtime continues to use Sharp as a local fallback.
 
-For a local production-runtime check, run `npm run preview`. To build and deploy from a signed-in local shell, run `npm run deploy`.
+`npm run cf:build` remains an alias for the default Cloudflare build. For a local production-runtime check, run `npm run preview`. To build and deploy from a signed-in local shell, run `npm run deploy`.
