@@ -36,9 +36,13 @@ The estimator processes photos in memory and does not create private report link
 
 This full-stack Next.js application deploys through Cloudflare Workers with the OpenNext adapter; it is not a static Pages export. In Workers Builds, use:
 
-- Build command: `npm run build:cloudflare`
-- Deploy command: `npx wrangler deploy`
+- Build command: `npm run cf:build`
+- Deploy command: `npx opennextjs-cloudflare deploy`
+- Root directory: `/`
+- Node.js version: `22`
 
-Add `AI_API_KEY` (or `OPENAI_API_KEY`), `AI_VISION_MODEL`, `RESEND_API_KEY`, and any public `NEXT_PUBLIC_*` values under **Build Variables and secrets**. Add runtime secrets to the Worker as well. The committed `wrangler.jsonc` deliberately gives the Worker and its self-service binding the same `car-repair-cost-estimate` name.
+Add `AI_PROVIDER`, `AI_API_KEY` (or `OPENAI_API_KEY`), `AI_VISION_MODEL`, `RESEND_API_KEY`, `CONTACT_FROM_EMAIL`, the rate-limit values, and any public `NEXT_PUBLIC_*` values under **Build Variables and secrets**. Add `AI_API_KEY`/`OPENAI_API_KEY` and `RESEND_API_KEY` as encrypted runtime secrets as well. The committed `wrangler.jsonc` deliberately gives the Worker and its self-service binding the same `carspect-pro` name.
 
-For a local production-runtime check, run `npm run preview:cloudflare`. To build and deploy from a signed-in local shell, run `npm run deploy:cloudflare`.
+The estimate and PDF routes use the Cloudflare Images binding to validate, re-encode, resize, and strip metadata from uploaded photos. Cloudflare Images transformations may be billed by Cloudflare. The existing Node/Hostinger runtime continues to use Sharp as a local fallback.
+
+For a local production-runtime check, run `npm run preview`. To build and deploy from a signed-in local shell, run `npm run deploy`.

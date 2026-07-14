@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp";
 import { estimateInputSchema } from "@/lib/estimate-schema";
 import { calculateEstimate } from "@/lib/pricing";
 import { analyzeDamage, AnalysisUnavailableError, InadequatePhotosError } from "@/lib/ai/provider";
@@ -7,6 +6,7 @@ import { takeRateLimit } from "@/lib/rate-limit";
 import { randomUUID } from "node:crypto";
 import { createUserInputAnalysis } from "@/lib/manual-analysis";
 import { withConcurrencyLimit, WorkloadBusyError } from "@/lib/concurrency";
+import { sanitizeImage } from "@/lib/image-processing";
 
 export const runtime = "nodejs";
 const allowed = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -25,17 +25,13 @@ export async function POST(request: NextRequest) {
     const files = data.getAll("photos").filter((v): v is File => v instanceof File);
     if (files.length < 1 || files.length > 10) return NextResponse.json({ error: "Upload between 1 and 10 photos." }, { status: 400 });
     if (files.some(file => !allowed.has(file.type) || file.size > 10 * 1024 * 1024)) throw new Error("Each photo must be JPG, PNG, or WebP and no larger than 10 MB.");
-    if (files.reduce((total, file) => total + file.size, 0) > 50 * 1024 * 1024) throw new Error("The combined photo upload must be no larger than 50 MB.");
+    if (files.reduce((total, file) => total + file.size, 0) > 25 * 1024 * 1024) throw new Error("The combined photo upload must be no larger than 25 MB.");
     const images = await withConcurrencyLimit("estimate-image-processing", 2, async () => {
       const sanitizedImages: Array<{ mime: string; base64: string }> = [];
       for (const file of files) {
         if (request.signal.aborted) throw new DOMException("The request was cancelled.", "AbortError");
-        const source = Buffer.from(await file.arrayBuffer());
-        const image = sharp(source, { limitInputPixels: 40_000_000, sequentialRead: true }).timeout({ seconds: 15 }).rotate();
-        const metadata = await image.metadata();
-        if (!metadata.width || !metadata.height) throw new Error("One of the uploaded files is not a readable image.");
-        const sanitized = await image.resize({ width: 1800, height: 1800, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 84 }).toBuffer();
-        sanitizedImages.push({ mime: "image/jpeg", base64: sanitized.toString("base64") });
+        const sanitized = await sanitizeImage(await file.arrayBuffer(), { width: 1800, height: 1800, quality: 84, timeoutSeconds: 15 });
+        sanitizedImages.push({ mime: "image/jpeg", base64: Buffer.from(sanitized).toString("base64") });
       }
       return sanitizedImages;
     });
