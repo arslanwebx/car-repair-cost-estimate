@@ -85,7 +85,17 @@ body{overflow-x:hidden}.menu-button{display:none;width:44px;height:44px;border:1
 /* Site-wide typography */
 body{font-family:var(--font-poppins),Arial,sans-serif}
 
-.landing-hero h1{font-weight:800}
+.eyebrow,.sample-label{display:none}
+
+.hero h1,
+.page-hero h1,
+.content-page h1,
+.empty-page h1,
+.report-title-grid h1,
+.estimator-heading h1{
+  font-weight:600;
+  letter-spacing:.01em;
+}
 
 /* Keep the final CTA legible when the shared primary-button hover applies. */
 .final-cta .button.light:hover{background:var(--navy);border-color:#fff;color:#fff}
