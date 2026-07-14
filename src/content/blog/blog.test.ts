@@ -18,11 +18,13 @@ describe("Carspect blog content", () => {
     expect(blogArticles.map((article) => article.slug).sort()).toEqual(expectedSlugs.sort());
     expect(new Set(blogArticles.map((article) => article.slug)).size).toBe(blogArticles.length);
     expect(new Set(blogCategories.map((category) => category.slug)).size).toBe(blogCategories.length);
+    const articleSlugs = new Set(blogArticles.map((article) => article.slug));
     for (const category of blogCategories) {
       const words = category.intro.trim().split(/\s+/).length;
       expect(words).toBeGreaterThanOrEqual(60);
       expect(words).toBeLessThanOrEqual(120);
       expect(blogArticles.some((article) => article.category.slug === category.slug)).toBe(true);
+      expect(articleSlugs.has(category.slug)).toBe(false);
     }
   });
 
@@ -80,7 +82,10 @@ describe("Carspect blog content", () => {
   it("includes every archive, category, and article in the sitemap", () => {
     const urls = new Set(sitemap().map((entry) => entry.url));
     expect(urls.has("https://carspect.pro/blog")).toBe(true);
-    blogCategories.forEach((category) => expect(urls.has(`https://carspect.pro/blog/category/${category.slug}`)).toBe(true));
+    blogCategories.forEach((category) => {
+      expect(urls.has(`https://carspect.pro/blog/${category.slug}`)).toBe(true);
+      expect(urls.has(`https://carspect.pro/blog/category/${category.slug}`)).toBe(false);
+    });
     blogArticles.forEach((article) => expect(urls.has(`https://carspect.pro/blog/${article.slug}`)).toBe(true));
   });
 });
