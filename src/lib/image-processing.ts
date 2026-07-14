@@ -7,24 +7,15 @@ type ImageOptions = {
   timeoutSeconds: number;
 };
 
-type ImageInfo = { width?: number; height?: number };
-type ImagesResult = { response(): Response };
-type ImagesTransformer = {
-  transform(options: { width: number; height: number; fit: "scale-down" }): ImagesTransformer;
-  output(options: { format: "image/jpeg"; quality: number; anim: false }): Promise<ImagesResult>;
-};
-type ImagesBinding = {
-  info(stream: ReadableStream<Uint8Array>): Promise<ImageInfo>;
-  input(stream: ReadableStream<Uint8Array>): ImagesTransformer;
-};
-
 function imageStream(source: ArrayBuffer) {
   return new Blob([source]).stream();
 }
 
+type ImagesBinding = NonNullable<CloudflareEnv["IMAGES"]>;
+
 function getImagesBinding(): ImagesBinding | null {
   try {
-    return (getCloudflareContext().env.IMAGES as ImagesBinding | undefined) ?? null;
+    return getCloudflareContext().env.IMAGES ?? null;
   } catch {
     return null;
   }
@@ -32,7 +23,7 @@ function getImagesBinding(): ImagesBinding | null {
 
 async function processWithCloudflare(source: ArrayBuffer, options: ImageOptions, binding: ImagesBinding) {
   const info = await binding.info(imageStream(source));
-  if (!info.width || !info.height || info.width * info.height > 40_000_000) {
+  if (!("width" in info) || !info.width || !info.height || info.width * info.height > 40_000_000) {
     throw new Error("One of the uploaded files is not a readable image.");
   }
   const result = await binding

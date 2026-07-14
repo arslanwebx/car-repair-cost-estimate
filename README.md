@@ -32,17 +32,25 @@ Photos are decoded and re-encoded to remove EXIF metadata, sent to the configure
 
 The estimator processes photos in memory and does not create private report links or persistent estimate records. This keeps the current deletion behavior immediate: clearing the browser workflow removes the local draft and there is no Carspect database copy. The NHTSA proxy fails open to manual vehicle entry. Contact submissions are sent only to `support@carspect.pro` through Resend; when `RESEND_API_KEY` is absent, users receive an explicit support-email fallback instead of a false success state. Replace the in-memory rate limiter with a shared store before multi-instance production deployment.
 
-### Cloudflare Workers
+### Cloudflare Workers Deployment
 
 This full-stack Next.js application deploys through Cloudflare Workers with the OpenNext adapter; it is not a static Pages export. The default build now generates both the Next.js output and the `.open-next` Worker bundle, so both the recommended commands and Cloudflare's auto-detected Wrangler deploy path work. In Workers Builds, use:
 
+- Project type: `Cloudflare Worker using Workers Builds`
+- Production branch: `main`
+- Root directory: leave blank (the repository root contains `package.json`)
 - Build command: `npm run build`
 - Deploy command: `npx wrangler deploy`
-- Root directory: `/`
+- Non-production branch deploy command: `npx wrangler versions upload`
 - Node.js version: `22`
+- Worker name: `car-repair-cost-estimate`
 
-Add `AI_PROVIDER`, `AI_API_KEY` (or `OPENAI_API_KEY`), `AI_VISION_MODEL`, `RESEND_API_KEY`, `CONTACT_FROM_EMAIL`, the rate-limit values, and any public `NEXT_PUBLIC_*` values under **Build Variables and secrets**. Add `AI_API_KEY`/`OPENAI_API_KEY` and `RESEND_API_KEY` as encrypted runtime secrets as well. The committed `wrangler.jsonc` deliberately gives the Worker and its self-service binding the same `carspect-pro` name.
+In **Worker > Settings > Variables and Secrets**, add `AI_API_KEY` (or the supported `OPENAI_API_KEY` alias) and `RESEND_API_KEY` as encrypted runtime secrets. Add `AI_PROVIDER`, `AI_VISION_MODEL`, `CONTACT_FROM_EMAIL`, `PHOTO_RETENTION_HOURS`, `RATE_LIMIT_REQUESTS`, and `RATE_LIMIT_WINDOW_MINUTES` as runtime variables. The AI route returns a limited-confidence fallback when its key is absent, and the contact route returns an explicit configuration error when `RESEND_API_KEY` is absent.
+
+Set `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_GA_MEASUREMENT_ID` as build-time public variables because Next.js embeds `NEXT_PUBLIC_*` values into browser code. These values are not secrets. If runtime and build-time settings are managed separately in the dashboard, the private keys belong only in runtime secrets; build-time AI and email keys are not required for compilation.
+
+The committed `wrangler.jsonc` uses `car-repair-cost-estimate` for both the Worker and `WORKER_SELF_REFERENCE` service binding. Keep these identifiers synchronized with the connected Cloudflare Worker.
 
 The estimate and PDF routes use the Cloudflare Images binding to validate, re-encode, resize, and strip metadata from uploaded photos. Cloudflare Images transformations may be billed by Cloudflare. The existing Node/Hostinger runtime continues to use Sharp as a local fallback.
 
-`npm run cf:build` remains an alias for the default Cloudflare build. For a local production-runtime check, run `npm run preview`. To build and deploy from a signed-in local shell, run `npm run deploy`.
+`npm run cf:build` remains an alias for the default Cloudflare build. For a local production-runtime check, run `npm run preview`. To build and deploy from a signed-in local shell, run `npm run deploy`; to upload a non-production Worker version without deploying it, run `npm run upload`.

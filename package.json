@@ -13,6 +13,7 @@
     "cf:build": "npm run build",
     "preview": "npm run build && opennextjs-cloudflare preview",
     "deploy": "npm run build && opennextjs-cloudflare deploy",
+    "upload": "npm run build && opennextjs-cloudflare upload",
     "build:cloudflare": "npm run cf:build",
     "preview:cloudflare": "npm run preview",
     "deploy:cloudflare": "npm run deploy",
