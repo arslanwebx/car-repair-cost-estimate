@@ -1,16 +1,10 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { BlogArticleCard } from "@/components/blog/article-card";
 import { CategoryIcon } from "@/components/blog/category-icon";
 import { blogArticles, blogCategories } from "@/content/blog";
+import { metadataFor } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Car Damage and Auto Body Repair Guides",
-  description: "Practical car damage, repair estimate, insurance claim, and bumper guidance from the Carspect Editorial Team.",
-  alternates: { canonical: "/blog" },
-  openGraph: { title: "Car Damage and Auto Body Repair Guides", description: "Practical guidance for documenting damage, reading repair estimates, and planning the next step.", url: "/blog", type: "website" },
-  twitter: { card: "summary_large_image", title: "Car Damage and Auto Body Repair Guides", description: "Practical guidance for car damage, repair estimates, insurance claims, and bumper decisions." }
-};
+export const metadata = metadataFor("blog");
 
 export default function BlogPage() {
   return <div className="blog-page"><header className="blog-archive-header"><div className="shell narrow"><h1>Car Damage and Auto Body Repair Guides</h1><p>Clear, carefully sourced guidance for documenting vehicle damage, understanding body shop estimates, and preparing for repair or an insurance conversation.</p></div></header>

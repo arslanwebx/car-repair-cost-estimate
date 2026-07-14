@@ -8,8 +8,8 @@ export const readRepairEstimate: BlogArticle = {
   description: "Decode body shop estimate lines for parts, labor, paint, scans, calibration, fees, and supplements before authorizing repairs.",
   excerpt: "Learn what common collision-estimate abbreviations and line items mean, then compare repair scope without relying on the total alone.",
   category: { name: "Repair Estimates", slug: "repair-estimates" },
-  published: "2026-07-12T09:00:00-04:00",
-  modified: "2026-07-14T09:00:00-04:00",
+  published: "2026-07-12",
+  modified: "2026-07-14",
   image: "/images/blog/auto-body-repair-estimate-breakdown.webp",
   imageAlt: "Itemized auto body repair estimate showing parts labor paint and calibration lines",
   tags: ["body shop estimate", "labor hours", "parts", "paint", "calibration"],
@@ -30,6 +30,14 @@ export const readRepairEstimate: BlogArticle = {
       ["Notes or symbols", "Condition, footnote, or manual entry", "What assumption or procedure does the note identify?"]
     ]),
     p(text("Estimating systems use abbreviations that vary. Common actions include remove and install, remove and replace, repair, overhaul, align, refinish, blend, and sublet. Ask for the shop's legend rather than guessing. A symbol may indicate a manual line, included operation, recycled part, price quote, or database note. Manual does not automatically mean improper; it often means the estimator added a procedure or time not supplied by the database. It should still have a clear basis.")),
+    table("Common estimate abbreviations", ["Abbreviation", "Typical meaning", "Verify on this estimate"], [
+      ["R&I", "Remove and install the existing part", "Which access operation requires removal?"],
+      ["R&R", "Remove and replace with another part", "What part source and transfer work are included?"],
+      ["REPL", "Replace", "Are preparation, fit, and refinish separate lines?"],
+      ["REPR", "Repair", "How many judgment hours and what method are proposed?"],
+      ["SUBL", "Sublet work performed by another provider", "Who performs it and is the quoted amount confirmed?"],
+      ["M", "Often a manual entry", "What documentation supports the operation or time?"]
+    ]),
     h2("parts", "Read Every Parts Line for Source and Scope"),
     p(text("A part description should identify what is being replaced and, ideally, the source. OEM generally means supplied under the vehicle manufacturer's brand. Aftermarket means produced outside that brand's parts channel. Recycled OEM is a used original part, while remanufactured or reconditioned parts have been restored through a defined process. The FTC describes these broad classifications and recommends understanding whether replacement parts are new, remanufactured, rebuilt, or salvage.")),
     p(text("Check whether the estimate includes fasteners, clips, brackets, absorbers, reinforcements, emblems, moldings, lamps, sensor holders, adhesives, seam sealers, and one-time-use hardware. A bumper line may refer only to the painted outer cover. It does not automatically include the energy absorber or metal reinforcement behind it. Look for freight, core charges, hazardous-material charges, tax, and price adjustments, then ask which amounts are verified quotes versus allowances.")),
@@ -61,6 +69,15 @@ export const readRepairEstimate: BlogArticle = {
       [text("Fees, tax treatment, deductible, betterment, prior damage, and customer-pay items.")],
       [text("Gross total, insurer or other payments, and the remaining customer responsibility.")]
     ]),
+    table("Worked Carspect sample total", ["Category", "Low", "High"], [
+      ["Parts", "$250", "$650"],
+      ["Body labor", "$600", "$850"],
+      ["Paint labor and materials", "$540", "$840"],
+      ["Scans and shop supplies", "$210", "$320"],
+      ["Hidden-damage allowance", "$400", "$740"],
+      ["Calculated total", "$2,000", "$3,400"]
+    ]),
+    p(text("This calculation reproduces the itemized total in Carspect's "), link("2019 Ford F-150 fender sample", "/sample-estimates/ford-f150-fender-damage"), text(" for Chicago, Illinois, using pricing data US-2026.07-v3. It is a demonstration based on the visible sample, not a customer case or shop quote. A professional estimate may use different line labels, rates, taxes, part prices, or conditional operations.")),
     p(text("A deductible is generally the policyholder's share of a covered loss, not a discount from the repair scope. Betterment or depreciation may apply in limited situations depending on policy and state rules. Prior unrelated damage should be separated from the loss under review. Ask for written explanations of any amount assigned to you.")),
     h2("compare", "Compare Two Estimates Line by Line"),
     p(text("Print or open both documents side by side. Match each damaged component and mark differences in repair versus replace, part source, quantity, labor operation, hours, paint scope, blends, scans, calibration, materials, fees, and tax. Then compare assumptions: Did one estimator inspect the vehicle in person? Was teardown performed? Are parts prices confirmed? Does one document include hidden-damage allowances or operations the other defers?")),

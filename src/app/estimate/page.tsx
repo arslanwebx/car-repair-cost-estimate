@@ -1,4 +1,9 @@
-import type { Metadata } from "next";
+import Link from "next/link";
 import { Estimator } from "@/components/estimator";
-export const metadata:Metadata={title:"Get a Free Car Damage Repair Estimate",description:"Upload vehicle damage photos and receive an AI-assisted, itemized U.S. car body repair cost range from Carspect.",alternates:{canonical:"/estimate"}};
-export default function EstimatePage(){return <div className="estimate-page"><div className="shell"><Estimator/></div></div>}
+import { metadataFor } from "@/lib/seo";
+
+export const metadata = metadataFor("estimate");
+
+export default function EstimatePage() {
+  return <div className="estimate-page"><div className="shell"><Estimator/></div><section className="estimate-support shell" aria-labelledby="estimate-support-title"><h2 id="estimate-support-title">Prepare a Clear Damage Submission</h2><p>Carspect needs basic vehicle details, the damaged areas, a short explanation, a five-digit ZIP code, and at least one useful damage photo. Three to six clear angles usually provide better visible context.</p><div className="three-grid"><article className="info-card"><h3>Photos to upload</h3><p>Include a wide vehicle view, a straight-on view of the damaged panel, a close-up, and nearby undamaged panels. Avoid blur, glare, deep shadow, documents, and faces.</p></article><article className="info-card"><h3>What the report includes</h3><p>The result separates likely parts, body labor, paint, scans or calibration allowances, supplies, tax, and possible hidden-damage costs into a preliminary range.</p></article><article className="info-card"><h3>How photos are handled</h3><p>Accepted images are decoded, resized when needed, and re-encoded before analysis to remove embedded EXIF metadata. No account or email is required.</p></article></div><div className="notice"><strong>What photos cannot determine</strong><p>Photos cannot confirm hidden, structural, mechanical, electrical, sensor, suspension, or safety-system damage. Carspect cannot decide whether a vehicle is safe to drive or guarantee a final repair price.</p></div><p className="estimate-support-links">See <Link href="/sample-estimates">example itemized reports</Link>, review <Link href="/photo-data-policy">how damage photos are processed</Link>, or read the <Link href="/disclaimer">estimate and safety limitations</Link>.</p></section></div>;
+}

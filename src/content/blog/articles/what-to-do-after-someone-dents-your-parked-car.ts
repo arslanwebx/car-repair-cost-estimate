@@ -8,8 +8,8 @@ export const parkedCarDent: BlogArticle = {
   description: "Document a parked-car dent, preserve evidence, contact the right parties, and compare repair and insurance options step by step.",
   excerpt: "A calm sequence for photographing a parking-lot dent, preserving evidence, checking coverage, and deciding how to pursue repair.",
   category: { name: "After an Accident", slug: "after-an-accident" },
-  published: "2026-07-11T09:00:00-04:00",
-  modified: "2026-07-14T09:00:00-04:00",
+  published: "2026-07-11",
+  modified: "2026-07-14",
   image: "/images/blog/parked-car-dent-documentation.webp",
   imageAlt: "Vehicle owner photographing a dent found on the door of a parked car",
   tags: ["parked car dent", "hit and run", "damage documentation", "insurance claim"],
@@ -48,6 +48,7 @@ export const parkedCarDent: BlogArticle = {
     h2("insurance-options", "Compare Repair Cost With Coverage and Deductible"),
     p(text("Review your declarations page and policy rather than assuming every parked-car dent is handled the same way. Depending on the facts and policy, collision, uninsured motorist property damage, or another coverage may be discussed. Deductibles, exclusions, rental coverage, claim deadlines, and reporting duties vary. The"), link("NAIC consumer auto insurance guide", "https://content.naic.org/consumer/auto-insurance.htm"), text("explains common coverage categories while emphasizing that the policy controls.")),
     p(text("Use Carspect's"), link("estimate tool", "/estimate"), text("and a local repair-facility estimate to understand the likely range. If the repair appears close to or below the deductible, you can ask the insurer how an inquiry or claim would be handled before authorizing work. Do not conceal facts or ask a shop to change the cause of loss. If another driver is identified, keep your insurer informed about any direct payment conversation.")),
+    callout("Hypothetical deductible comparison", text("Carspect's "), link("2021 Honda Civic rear-bumper sample", "/sample-estimates/honda-civic-rear-bumper-dent"), text(" shows a $950 to $1,600 preliminary range for visible damage in Dallas, Texas, using pricing data US-2026.07-v3. If a policy hypothetically had a $500 deductible and the loss were covered, subtracting $500 from that demonstration range leaves $450 to $1,100 before any coverage limits, supplements, or insurer decisions. This is arithmetic for comparison, not a claim outcome; the sample is not a customer case, certified appraisal, or guaranteed shop price.")),
     h2("open-claim", "Build a Clean Claim File"),
     p(text("The"), link("National Association of Insurance Commissioners", "https://content.naic.org/article/what-you-should-know-about-filing-auto-claim"), text("recommends keeping scene information, notes, estimates, and records of conversations. Create one folder for original photos, property reports, police confirmation, witness contacts, insurer correspondence, estimates, invoices, and receipts. After calls, note the date, representative, claim number, and agreed next step. Ask for important decisions in writing.")),
     checklist("Information to have ready", [

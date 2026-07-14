@@ -8,8 +8,8 @@ export const bumperRepairOrReplace: BlogArticle = {
   description: "Compare crack, dent, mounting, sensor, parts, paint, and labor factors that determine whether a damaged bumper is repaired or replaced.",
   excerpt: "Understand the material, mounting, safety-system, cost, and procedure factors behind a professional bumper repair-or-replace decision.",
   category: { name: "Repair or Replace", slug: "repair-or-replace" },
-  published: "2026-07-14T09:00:00-04:00",
-  modified: "2026-07-14T09:00:00-04:00",
+  published: "2026-07-14",
+  modified: "2026-07-14",
   image: "/images/blog/bumper-repair-versus-replacement.webp",
   imageAlt: "Technician inspecting a damaged bumper to decide between repair and replacement",
   tags: ["bumper repair", "bumper replacement", "ADAS", "collision repair"],
@@ -67,6 +67,7 @@ export const bumperRepairOrReplace: BlogArticle = {
       ["Risk", "Durability, shape, film thickness, prior damage", "Part fit, availability, source, transfer work"]
     ]),
     p(text("Do not compare the price of a bare replacement cover with the full repair line. Compare complete installed scopes. Include tear-down and reassembly, parts and freight, labor, paint and materials, blends if needed, scans, calibration, alignment checks, taxes, fees, and expected supplements. Use Carspect's"), link("estimate flow", "/estimate"), text("and"), link("sample repair estimates", "/sample-estimates"), text("to see these categories separated.")),
+    callout("Installed-cost demonstration", text("The "), link("2020 Toyota Camry front-bumper and grille sample", "/sample-estimates/toyota-camry-front-bumper-grille"), text(" shows a $3,000 to $5,400 preliminary Los Angeles range using pricing data US-2026.07-v3. Its $1,000 to $1,900 parts range is only one component; body labor, paint, materials, scans, possible calibration, supplies, and hidden-damage allowance make up the rest. The sample demonstrates scope comparison and is not a customer result, certified appraisal, repair authorization, or guaranteed price.")),
     p(text("A lower initial replacement part price can be offset by transfer labor and added hardware. A seemingly inexpensive repair can grow when the cover requires extensive reshaping and refinishing. Availability also matters: a suitable part on backorder can extend rental or storage needs, while rushing to an unsuitable part can create fit or procedure problems.")),
     h2("parts-choice", "Ask About Part Source Without Oversimplifying"),
     p(text("OEM, aftermarket, and recycled OEM covers can differ in availability, included hardware, preparation, prior finish, and fit. The right option depends on vehicle design, policy, state requirements, shop capability, sensor considerations, and current parts information. Ask for the part number and source, whether it is available, what preparation it needs, what warranty applies, and whether vehicle procedures restrict its use.")),
@@ -85,6 +86,13 @@ export const bumperRepairOrReplace: BlogArticle = {
     h2("decision", "Use a Decision Process, Not a Visual Shortcut"),
     p(text("First, identify all affected bumper-system components. Second, document the cover's cracks, deformation, mounts, gaps, paint, and sensor areas. Third, obtain vehicle-specific repair information and diagnostic or measurement results. Fourth, compare complete repair and replacement scopes. Finally, consider durability, safety-system requirements, parts availability, warranty, total cost, and time.")),
     p(text("A professional may reasonably recommend repair for one vehicle and replacement for visually similar damage on another because the material, sensor layout, procedures, and parts economics differ. Ask for the reasoning in plain language and keep it with the estimate. That explanation is more valuable than a universal rule based on crack length or dent size.")),
+    table("Repair-or-replace decision matrix", ["Finding", "Repair remains possible when", "Replacement becomes more likely when"], [
+      ["Cover shape", "Deformation is localized and dimensions can be restored", "Shape is stretched, missing, or cannot hold correct fit"],
+      ["Mounting points", "Tabs and holes can be restored under the procedure", "Critical mounts are torn or geometry is lost"],
+      ["Sensor area", "Current instructions permit the method and finish build", "Repair is restricted in a transmission zone"],
+      ["Hidden components", "Absorber, reinforcement, wiring, and brackets pass inspection", "A separate safety-related component is damaged"],
+      ["Installed scope", "Repair labor and refinish produce a supported durable plan", "Replacement is better supported after all transfer work is compared"]
+    ]),
     callout("Bottom line", text("Repair is appropriate only when the specific damage, material, location, procedures, and installed cost support a durable result. Replacement is appropriate when restoration is restricted, unreliable, or uneconomical. Hidden components and sensor requirements must be evaluated separately from the visible cover."))
   ],
   faqs: [

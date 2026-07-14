@@ -1,15 +1,25 @@
 import type { MetadataRoute } from "next";
+import { CONTENT_DATES, SAMPLE_ESTIMATE_DATES } from "@/config/content-dates";
 import { blogArticles, blogCategories } from "@/content/blog";
 import { sampleEstimates } from "@/data/sample-estimates";
+import { SITE_URL, STATIC_PAGE_SEO } from "@/lib/seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://carspect.pro";
-  const staticPaths = ["", "/estimate", "/sample-estimates", ...sampleEstimates.map((sample) => `/sample-estimates/${sample.slug}`), "/about-us", "/contact-us", "/privacy-policy", "/terms-of-service", "/disclaimer", "/cookie-policy", "/photo-data-policy", "/editorial-policy"];
-  const staticEntries: MetadataRoute.Sitemap = staticPaths.map((path) => ({ url: base + path, lastModified: new Date("2026-07-14"), changeFrequency: path === "" ? "weekly" : "monthly", priority: path === "" ? 1 : path === "/estimate" ? .9 : .6 }));
-  const blogEntries: MetadataRoute.Sitemap = [
-    { url: `${base}/blog`, lastModified: new Date("2026-07-14"), changeFrequency: "weekly", priority: .8 },
-    ...blogCategories.map((category) => ({ url: `${base}/blog/${category.slug}`, lastModified: new Date("2026-07-14"), changeFrequency: "monthly" as const, priority: .65 })),
-    ...blogArticles.map((article) => ({ url: `${base}/blog/${article.slug}`, lastModified: new Date(article.modified), changeFrequency: "monthly" as const, priority: .75 }))
-  ];
-  return [...staticEntries, ...blogEntries];
+  const staticEntries: MetadataRoute.Sitemap = (Object.keys(STATIC_PAGE_SEO) as Array<keyof typeof STATIC_PAGE_SEO>).map((key) => ({
+    url: new URL(STATIC_PAGE_SEO[key].path, SITE_URL).toString(),
+    lastModified: CONTENT_DATES[key]
+  }));
+  const sampleEntries: MetadataRoute.Sitemap = sampleEstimates.map((sample) => ({
+    url: new URL(`/sample-estimates/${sample.slug}`, SITE_URL).toString(),
+    lastModified: SAMPLE_ESTIMATE_DATES[sample.slug]
+  }));
+  const categoryEntries: MetadataRoute.Sitemap = blogCategories.map((category) => ({
+    url: new URL(`/blog/${category.slug}`, SITE_URL).toString(),
+    lastModified: CONTENT_DATES.blogCategories
+  }));
+  const articleEntries: MetadataRoute.Sitemap = blogArticles.map((article) => ({
+    url: new URL(`/blog/${article.slug}`, SITE_URL).toString(),
+    lastModified: article.modified
+  }));
+  return [...staticEntries, ...sampleEntries, ...categoryEntries, ...articleEntries];
 }

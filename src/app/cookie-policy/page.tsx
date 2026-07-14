@@ -1,1 +1,1 @@
-import type { Metadata } from "next";import Page from "../cookies/page";export const metadata:Metadata={title:"Cookie Policy",alternates:{canonical:"/cookie-policy"}};export default Page;
+import Page from "../cookies/page";import { metadataFor } from "@/lib/seo";export const metadata=metadataFor("cookiePolicy");export default Page;
