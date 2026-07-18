@@ -32,6 +32,12 @@ if (!sitemapResponse.ok) fail(`Sitemap returned ${sitemapResponse.status}`);
 const sitemapXml = await sitemapResponse.text();
 const sitemapEntries = [...sitemapXml.matchAll(/<url>\s*<loc>(.*?)<\/loc>\s*<lastmod>(.*?)<\/lastmod>\s*<\/url>/g)].map((match) => ({ url: decode(match[1]), lastmod: match[2] }));
 if (!sitemapEntries.length) fail("Sitemap contains no URLs");
+if (sitemapEntries.some((entry) => entry.url.replace(/\/$/, "") === `${productionOrigin}/estimate`)) fail("Noindex route /estimate must not appear in the sitemap");
+
+const estimateResponse = await fetch(`${origin}/estimate`);
+if (!estimateResponse.ok) fail(`/estimate returned ${estimateResponse.status}`);
+const estimateHtml = await estimateResponse.text();
+if (!/noindex/i.test(meta(estimateHtml, "name", "robots") ?? "")) fail("/estimate is missing noindex");
 
 const titles = new Map();
 const descriptions = new Map();

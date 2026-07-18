@@ -15,6 +15,7 @@ type MetadataRecord = Record<string, unknown> & {
   alternates?: { canonical?: unknown };
   openGraph?: Record<string, unknown>;
   twitter?: Record<string, unknown>;
+  robots?: unknown;
 };
 
 function expectCompleteMetadata(metadata: MetadataRecord, url: string) {
@@ -81,9 +82,11 @@ describe("Carspect SEO metadata", () => {
       expect(entry.changeFrequency).toBeUndefined();
       expect(entry.priority).toBeUndefined();
     }
-    for (const seo of Object.values(STATIC_PAGE_SEO)) {
+    for (const seo of Object.values(STATIC_PAGE_SEO).filter((seo) => seo.path !== "/estimate")) {
       expect(urls.has(new URL(seo.path, "https://carspect.pro").toString())).toBe(true);
     }
+    expect(urls.has("https://carspect.pro/estimate")).toBe(false);
+    expect((metadataFor("estimate") as MetadataRecord).robots).toEqual({ index: false, follow: true });
   });
 
   it("keeps source dates centralized and sample schemas free of commercial-review types", () => {

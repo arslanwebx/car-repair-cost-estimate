@@ -12,8 +12,8 @@ export const AUTHOR_ID = `${SITE_URL}${AUTHOR_PATH}#person`;
 
 export const STATIC_PAGE_SEO = {
   home: {
-    title: "Car Body Repair Estimate Calculator",
-    description: "Estimate visible car body repair costs online with vehicle details, damage photos, and an itemized preliminary U.S. market range.",
+    title: "Free Car Body Repair Estimate Calculator",
+    description: "Use our free car body repair estimate calculator to upload damage photos and get an itemized preliminary range for parts, labor, paint, and more.",
     path: "/"
   },
   estimate: {
@@ -126,7 +126,10 @@ export function createPageMetadata({
 }
 
 export function metadataFor(key: StaticPageSeoKey) {
-  return createPageMetadata(STATIC_PAGE_SEO[key]);
+  const metadata = createPageMetadata(STATIC_PAGE_SEO[key]);
+  if (key === "home") metadata.title = brandedTitle(STATIC_PAGE_SEO.home.title);
+  if (key === "estimate") metadata.robots = { index: false, follow: true };
+  return metadata;
 }
 
 export function organizationJsonLd() {
