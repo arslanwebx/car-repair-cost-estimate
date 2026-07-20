@@ -40,6 +40,7 @@ describe("Carspect SEO metadata", () => {
       const seo = STATIC_PAGE_SEO[key];
       const metadata = metadataFor(key) as MetadataRecord;
       expectCompleteMetadata(metadata, new URL(seo.path, "https://carspect.pro").toString());
+      expect(metadata.robots).toEqual(key === "estimate" ? { index: false, follow: true } : { index: true, follow: true });
       expect(seo.description.length).toBeGreaterThanOrEqual(100);
       expect(seo.description.length).toBeLessThanOrEqual(170);
       titles.add(seo.title);

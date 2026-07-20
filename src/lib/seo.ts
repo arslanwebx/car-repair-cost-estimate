@@ -107,6 +107,10 @@ export function createPageMetadata({
   return {
     title,
     description,
+    // Indexing is explicit for all public, canonical pages. This prevents a
+    // stale inherited directive from accidentally keeping new content out of
+    // search results; the estimator is the sole exception in metadataFor.
+    robots: { index: true, follow: true },
     alternates: { canonical: absoluteUrl(path) },
     openGraph: {
       type,
@@ -128,6 +132,8 @@ export function createPageMetadata({
 export function metadataFor(key: StaticPageSeoKey) {
   const metadata = createPageMetadata(STATIC_PAGE_SEO[key]);
   if (key === "home") metadata.title = brandedTitle(STATIC_PAGE_SEO.home.title);
+  // The interactive estimator is intentionally excluded from search. Keep
+  // this exception here so every other public route remains indexable.
   if (key === "estimate") metadata.robots = { index: false, follow: true };
   return metadata;
 }
