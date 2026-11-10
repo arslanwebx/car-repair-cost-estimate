@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "opennextjs-cloudflare build",
+    "build": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion",
     "build:next": "next build",
     "cf:build": "npm run build",
     "preview": "npm run build && opennextjs-cloudflare preview",
