@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   description: "Estimate visible car body repair costs online with vehicle details, damage photos, and an itemized preliminary U.S. market range.",
   openGraph: { type: "website", siteName: "Carspect", title: "Carspect | Photo-Based Car Damage Estimates", description: "Estimate visible car body repair costs online from vehicle details and clear damage photos.", url: SITE_URL, images: [{ url: DEFAULT_SOCIAL_IMAGE, width: 1200, height: 630, alt: DEFAULT_SOCIAL_IMAGE_ALT }] },
   twitter: { card: "summary_large_image", images: [DEFAULT_SOCIAL_IMAGE] },
+  other: { quge5: "https://quge5.com/88/tag.min.js" },
   other: { monetag: "fe4bd2b3dd2748b0f46730426c4e3e49" }
 };
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="en"><body className={poppins.variable}><a className="skip" href="#main">Skip to content</a><Header/><main id="main">{children}</main><Footer/><GoogleAnalytics/></body></html>; }
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="en"><head><script src="https://quge5.com/88/tag.min.js" data-zone="308476" async data-cfasync="false"></script></head><body className={poppins.variable}><a className="skip" href="#main">Skip to content</a><Header/><main id="main">{children}</main><Footer/><GoogleAnalytics/></body></html>; }
